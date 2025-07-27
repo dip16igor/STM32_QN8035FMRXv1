@@ -139,52 +139,17 @@ void setup(void)
   delay(20); // delay
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  // pinMode(PB0, INPUT);        // POWER button input
+  // Initialize buttons
   pinMode(PB0, INPUT_PULLUP); // POWER button input with pullup
   pinMode(PB1, INPUT_PULLUP); // DOWN button input with pullup
   pinMode(PB2, INPUT_PULLUP); // UP button input with pullup
-  // pinMode(PC13, OUTPUT);      // enable
-  // digitalWrite(PC13, LOW);    // LED on
-  // digitalWrite(PA15, HIGH); // LED off
-  // digitalWrite(PB10, HIGH); // LED off
-  pinMode(PA15, OUTPUT); // enable
-  pinMode(PB10, OUTPUT); // enable
+  pinMode(PA5, INPUT);        // Encoder button
 
-  pinMode(PA5, INPUT); // Encoder button
+  // Initialize LED outputs
+  pinMode(PA15, OUTPUT); // LED indicator
+  pinMode(PB10, OUTPUT); // LED indicator
 
-  // pinMode(PA6, INPUT_PULLUP); // en
-  // pinMode(PB7, INPUT_PULLUP); // en
-
-  //  digitalWrite(PB10, HIGH);   // светодиод вкл
-  //   pinMode(PA8, OUTPUT);       // en
-  //  HAL_RCC_MCOConfig(RCC_MCO, RCC_MCOSOURCE_LSE, RCC_MCODIV_1);
-  //  /*Configure GPIO pin : PA8 */
-  //  GPIO_InitStruct.Pin = GPIO_PIN_8;
-  //  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-  //  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  //  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  //  MyTim1->
-
-  // Timer1.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
-  // MyTim1->setMode(TIM_CHANNEL_1, TIMER_OUTPUT_COMPARE_TOGGLE); // == TIM_OCMODE_TOGGLE           pin toggles when counter == channel compare
-
-  // pinMode(PA8, PWM);                        // en
-
-  //__HAL_TIM_SET_COUNTER(&htim3, 327);
-  // HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
-  // TIM3->CNT = 23;
-
-  // MyTim3->setMode(1, TIMER_OUTPUT_COMPARE_TOGGLE, PA8);
-  // MyTim3->setPrescaleFactor(1); // Due to setOverflow with MICROSEC_FORMAT, prescaler will be computed automatically based on timer input clock
-  // // MyTim3->setOverflow(32768 * 2, HERTZ_FORMAT); // 100000 microseconds = 100 milliseconds
-  // // MyTim1->attachInterrupt(Update_IT_callback);
-  // // MyTim1->setInterruptPriority(0, 0);
-  // MyTim3->resume();
-
-  // for (;;)
-  // {
-  // }
-  // -------------------------------------------------------------------------
+  // Initialize OLED display
   u8g2.begin();
 
   u8g2.setFont(u8g2_font_7x14B_mf);
@@ -201,31 +166,11 @@ void setup(void)
   // {
   // }
 
-  // u8g2.setFont(u8g2_font_mercutio_basic_nbp_tf);
-  // u8g2.drawStr(0, 12, "POWER ON "); // write something to the internal memory
-  //  u8g2.sendBuffer();                // transfer internal memory to the display
-  //   delay(200);                       // пауза
-  // u8g2.setFont(u8g2_font_mercutio_basic_nbp_tf);
-  // u8g2.drawStr(0, 24, "Init GPIO "); // write something to the internal memory
-  //  u8g2.sendBuffer();                 // transfer internal memory to the display
-  //   delay(100);                          // пауза
-  // u8g2.drawStr(8 * 10, 24, "[OK]"); // write something to the internal memory
-  //  u8g2.sendBuffer();                // transfer internal memory to the display
-  //   delay(200);                          // пауза
-  // u8g2.drawStr(0, 36, "Init Timers "); // write something to the internal memory
-  //  u8g2.sendBuffer();                   // transfer internal memory to the display
+  // Initialize Timer 3 for encoder input
 
   MX_TIM3_Init();
 
-  // u8g2.drawStr(8 * 10, 36, "[OK]"); // write something to the internal memory
-
-  // u8g2.sendBuffer();        // transfer internal memory to the display
-  // digitalWrite(PB10, HIGH); // светодиод вкл
-  // delay(200);                         // пауза
-  // u8g2.drawStr(0, 48, "Init RX .. "); // write something to the internal memory
-  // u8g2.sendBuffer();                  // transfer internal memory to the display
-
-  // delay(400); // пауза для загрузки приемника
+  // Initialize QN8035 tuner
 
   Wire.begin(); // join i2c bus
 
@@ -252,21 +197,14 @@ void setup(void)
 //====================================================================================================== LOOP ========================================
 void loop(void)
 {
-  // delay(3);
-  // digitalWrite(PA15, HIGH); // светодиод вкл
-
+  // Read tuner status
   SignalNoise = ReadReg(REG_SNR);
   RSSI = ReadReg(REG_RSSISIG) - 43;
   stereoStatus = (ReadReg(REG_STATUS1) & REG_STATUS1_ST_MO_RX) ? 'M' : 'S';
 
+  // Process RDS data if enabled
   if (RDSstate == 1)
     decodeRDSInfo(RDS_DOUBLE_BUFFER_ENABLE);
-
-  // digitalWrite(PA15, LOW); // светодиод выкл
-
-  // Freq += 10;
-  // if (Freq >= 110000)
-  // Freq = 60000;
 
   EncNew = ((int)(TIM3->CNT) - 32768) / 4;
 
@@ -381,14 +319,7 @@ void loop(void)
 
   u8g2.clearBuffer(); // clear the internal memory
 
-  // u8g2.setFont(u8g2_font_t0_12b_me); // choose a suitable font
-  // u8g2.setFont(u8g2_font_lastapprenticebold_tr); // choose a suitable font
-  // u8g2.setFont(u8g2_font_cupcakemetoyourleader_tr); // choose a suitable font
-  // u8g2.setFont(u8g2_font_t0_16b_mn); // choose a suitable font
-  // u8g2.setFont(u8g2_font_bauhaus2015_tr); // choose a suitable font
-  // u8g2.setFont(u8g2_font_Pixellari_tf); // choose a suitable font
-  // u8g2.setFont(u8g2_font_t0_17b_tf); // choose a suitable font
-  // u8g2.setFont(u8g2_font_tenfatguys_tf);
+  // Set font for frequency display
 
   u8g2.setFont(u8g2_font_logisoso20_tr);
   u8g2.setCursor(0, 21);
@@ -473,15 +404,8 @@ void loop(void)
     }
   }
 
-  // u8g2.drawRFrame(30, 49, 128 - 30, 16, 3);
   u8g2.setCursor(30, 63);
-  // u8g2.print(TIM3->CNT); //(&htim3)); // htim3.Instance->CNT);
-  // u8g2.print(" ");
-  // u8g2.print(temp1); //(&htim3)); // htim3.Instance->CNT);
-
   u8g2.sendBuffer(); // transfer internal memory to the display
-                     // digitalWrite(PA15, LOW);  // светодиод выкл
-                     // delay(1);
 }
 
 VOID decodeRDSInfo(unsigned char useDoubleBuffer)
@@ -636,8 +560,7 @@ static void MX_TIM3_Init(void)
 
   TIM3->CNT = 32768;
 
-  TIM3->CR1 = TIM_CR1_CEN; //
-  // digitalWrite(PB10, HIGH); // светодиод вкл
+  TIM3->CR1 = TIM_CR1_CEN; // Enable timer
 }
 
 VOID shutdownTuner()
