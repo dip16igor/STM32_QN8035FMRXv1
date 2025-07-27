@@ -1,11 +1,11 @@
-// FM приемник на QN8035
+// FM Receiver with QN8035
 
 #include <Arduino.h>
 #include <U8g2lib.h>
 #include <Wire.h>
 
-//#define USE_HSI_CLOCK 1
-// I2C address of the QN8035 tuner.
+// #define USE_HSI_CLOCK 1
+//  I2C address of the QN8035 tuner.
 #define QN8035_ADDRESS 0x10
 
 // Chip ID related to QN8035 tuner.
@@ -92,14 +92,14 @@
 #define RDS_INFO_MAX_SIZE 16
 CHAR rdsInfo[RDS_INFO_MAX_SIZE]; // = {'-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'};
 CHAR tempRDSBuffer[RDS_INFO_MAX_SIZE];
-long i; // счетчик общего назначения
+long i; // general purpose counter
 
 int Mode;
 
-long Freq = 108100; // текущая частота
+long Freq = 108100; // current frequency
 
 // OLED SSD1306
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/U8X8_PIN_NONE); // настройки OLED
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2(U8G2_R0, /* reset=*/U8X8_PIN_NONE); // OLED configuration
 // Create a U8g2log object
 
 HardwareTimer *MyTim1 = new HardwareTimer(TIM1); //
@@ -136,21 +136,21 @@ static void MX_TIM3_Init(void);
 // ========================================================================================================= SETUP =====================================
 void setup(void)
 {
-  delay(20); // пауза
+  delay(20); // delay
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
-  // pinMode(PB0, INPUT);        // вход кнопки POWER
-  pinMode(PB0, INPUT_PULLUP); // вход кнопки POWER
-  pinMode(PB1, INPUT_PULLUP); // вход кнопка DOWN
-  pinMode(PB2, INPUT_PULLUP); // вход кнопка UP
-  // pinMode(PC13, OUTPUT);      // en
-  // digitalWrite(PC13, LOW);    // светодиод вкл
-  // digitalWrite(PA15, HIGH); // светодиод выкл
-  // digitalWrite(PB10, HIGH); // светодиод выкл
-  pinMode(PA15, OUTPUT); // en
-  pinMode(PB10, OUTPUT); // en
+  // pinMode(PB0, INPUT);        // POWER button input
+  pinMode(PB0, INPUT_PULLUP); // POWER button input with pullup
+  pinMode(PB1, INPUT_PULLUP); // DOWN button input with pullup
+  pinMode(PB2, INPUT_PULLUP); // UP button input with pullup
+  // pinMode(PC13, OUTPUT);      // enable
+  // digitalWrite(PC13, LOW);    // LED on
+  // digitalWrite(PA15, HIGH); // LED off
+  // digitalWrite(PB10, HIGH); // LED off
+  pinMode(PA15, OUTPUT); // enable
+  pinMode(PB10, OUTPUT); // enable
 
-  pinMode(PA5, INPUT); // Кнопка энкодера
+  pinMode(PA5, INPUT); // Encoder button
 
   // pinMode(PA6, INPUT_PULLUP); // en
   // pinMode(PB7, INPUT_PULLUP); // en
@@ -295,15 +295,15 @@ void loop(void)
     }
     EncOld = EncNew;
   }
-  // ------------- кнопка UP ----------------
-  if (digitalRead(PB2) == LOW) // нажата кнопка RESET
+  // ------------- UP button ----------------
+  if (digitalRead(PB2) == LOW) // RESET button pressed
   {
 
-    if (digitalRead(PB1) == LOW) // нажата кнопка RESET
+    if (digitalRead(PB1) == LOW) // RESET button pressed
     {
-      digitalWrite(PB10, HIGH); // светодиод вкл
+      digitalWrite(PB10, HIGH); // LED on
       delay(100);
-      if (digitalRead(PB1) == LOW) // нажата кнопка RESET
+      if (digitalRead(PB1) == LOW) // RESET button pressed
         powerOff();
     }
 
@@ -375,9 +375,9 @@ void loop(void)
   else
     triggerENC = 1;
 
-  //-------------------------------------------- Отображение на экране ----------------------------
+  //-------------------------------------------- Display on screen ----------------------------
   int temp = 0;
-  u8g2.print(temp, 16); // Костыль, убирает один странный баг
+  u8g2.print(temp, 16); // Workaround to fix a strange bug
 
   u8g2.clearBuffer(); // clear the internal memory
 
@@ -550,11 +550,11 @@ void powerOff(void)
   u8g2.drawStr(0, 12, "STNDBY RX .."); // write something to the internal memory
   u8g2.sendBuffer();                   // transfer internal memory to the display
   shutdownTuner();
-  delay(200); // пауза
+  delay(200); // delay
   u8g2.setFont(u8g2_font_mercutio_basic_nbp_tf);
   u8g2.drawStr(0, 24, "HI-Z GPIO ");  // write something to the internal memory
   u8g2.sendBuffer();                  // transfer internal memory to the display
-  delay(100);                         // пауза
+  delay(100);                         // delay
   u8g2.drawStr(8 * 10, 24, "[OK]");   // write something to the internal memory
   delay(200);                         // пауза
   u8g2.sendBuffer();                  // transfer internal memory to the display
